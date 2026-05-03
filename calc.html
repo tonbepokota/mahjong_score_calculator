@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>麻雀 点数計算ツール</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      min-width: 300px;
+    }
+    input, select, button {
+      margin: 8px 0;
+      padding: 6px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    h2 {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>麻雀 点数計算ツール</h2>
+
+    <label>翻数 (Han)</label>
+    <input type="number" id="han" min="1" value="1">
+
+    <label>符 (Fu)</label>
+    <input type="number" id="fu" min="20" step="10" value="30">
+
+    <label>親か子か</label>
+    <select id="dealer">
+      <option value="child">子</option>
+      <option value="dealer">親</option>
+    </select>
+
+    <label>ツモ or ロン</label>
+    <select id="type">
+      <option value="ron">ロン</option>
+      <option value="tsumo">ツモ</option>
+    </select>
+
+    <button onclick="calculate()">計算</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function calculate() {
+      let han = parseInt(document.getElementById('han').value);
+      let fu = parseInt(document.getElementById('fu').value);
+      let dealer = document.getElementById('dealer').value;
+      let type = document.getElementById('type').value;
+
+      if (han <= 0 || fu < 20) {
+        document.getElementById('result').innerText = '入力値が不正です';
+        return;
+      }
+
+      let basePoints;
+
+      if (han >= 13) basePoints = 8000;
+      else if (han >= 11) basePoints = 6000;
+      else if (han >= 8) basePoints = 4000;
+      else if (han >= 6) basePoints = 3000;
+      else if (han >= 5 || (han === 4 && fu >= 40) || (han === 3 && fu >= 70)) {
+        basePoints = 2000;
+      } else {
+        basePoints = fu * Math.pow(2, 2 + han);
+      }
+
+      let resultText = '';
+
+      if (type === 'ron') {
+        if (dealer === 'dealer') {
+          let points = Math.ceil(basePoints * 6 / 100) * 100;
+          resultText = `ロン: ${points}点 (親)`;
+        } else {
+          let points = Math.ceil(basePoints * 4 / 100) * 100;
+          resultText = `ロン: ${points}点 (子)`;
+        }
+      } else {
+        if (dealer === 'dealer') {
+          let payment = Math.ceil(basePoints * 2 / 100) * 100;
+          resultText = `ツモ: ${payment}点オール (親)`;
+        } else {
+          let childPay = Math.ceil(basePoints * 1 / 100) * 100;
+          let dealerPay = Math.ceil(basePoints * 2 / 100) * 100;
+          resultText = `ツモ: 子 ${childPay}点 / 親 ${dealerPay}点`;
+        }
+      }
+
+      document.getElementById('result').innerText = resultText;
+    }
+  </script>
+</body>
+</html>
